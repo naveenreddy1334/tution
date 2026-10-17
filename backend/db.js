@@ -1,12 +1,16 @@
-import Database from 'better-sqlite3';
+import { DatabaseSync } from 'node:sqlite';
 import bcrypt from 'bcryptjs';
 import 'dotenv/config';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+// Uses Node's built-in SQLite (available from Node 22.5+) instead of better-sqlite3,
+// which needs native compilation at install time — that fails on hosts with an
+// outdated/broken build toolchain (old Python, broken node-gyp), which is common
+// on shared/budget hosting. node:sqlite needs no compilation at all.
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const db = new Database(path.join(__dirname, 'tuition.db'));
-db.pragma('journal_mode = WAL');
+const db = new DatabaseSync(path.join(__dirname, 'tuition.db'));
+db.exec('PRAGMA journal_mode = WAL');
 
 db.exec(`
 CREATE TABLE IF NOT EXISTS admin (

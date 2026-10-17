@@ -33,10 +33,15 @@ router.post('/bulk', (req, res) => {
     `INSERT INTO attendance (student_id, date, status) VALUES (?, ?, ?)
      ON CONFLICT(student_id, date) DO UPDATE SET status = excluded.status`
   );
-  const insertMany = db.transaction((recs) => {
-    for (const r of recs) stmt.run(r.student_id, date, r.status);
-  });
-  insertMany(records);
+  // node:sqlite has no db.transaction() helper like better-sqlite3 — wrap manually.
+  db.exec('BEGIN');
+  try {
+    for (const r of records) stmt.run(r.student_id, date, r.status);
+    db.exec('COMMIT');
+  } catch (err) {
+    db.exec('ROLLBACK');
+    throw err;
+  }
 
   res.json({ success: true, count: records.length });
 });
