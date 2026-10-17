@@ -3,6 +3,5 @@ node_modules/
 backend/*.db
 backend/*.db-shm
 backend/*.db-wal
-frontend/dist/
 .DS_Store
 *.log
