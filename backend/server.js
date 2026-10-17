@@ -26,8 +26,11 @@ app.use('/api/fees', requireAuth, feeRoutes);
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 
 // Serve the built frontend (single process, single port) if it exists.
-// Build it with: cd frontend && npm run build
-const frontendDist = path.join(__dirname, '..', 'frontend', 'dist');
+// Build it with: cd frontend && npm run build && cp -r dist ../backend/public
+// It lives inside backend/ (not ../frontend/dist) because some hosts (e.g.
+// Hostinger's Node app deploy with "Root directory: backend") only deploy
+// the backend folder itself — anything outside it never reaches the server.
+const frontendDist = path.join(__dirname, 'public');
 if (fs.existsSync(frontendDist)) {
   app.use(express.static(frontendDist));
   // SPA fallback: any non-API route serves index.html so React Router can take over.
